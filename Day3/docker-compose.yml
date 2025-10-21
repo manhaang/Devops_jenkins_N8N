@@ -1,0 +1,43 @@
+networks:
+  nodejs_network:
+    name: nodejs_network
+    driver: bridge
+
+services:
+
+  # NodeJS App
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - "mynodeapp:1.0"
+    container_name: mynodeapp
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3200:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true # สำหรับ Windows เพื่อให้ nodemon ทำงานได้
+    networks:
+      - nodejs_network
+    restart: always
+
+  # MongoDB
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "28017:27017"
+    networks:
+      - nodejs_network
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+    name: mongo_data
+    driver: local
